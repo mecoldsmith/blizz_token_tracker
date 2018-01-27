@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+	<html>
+		<head>
+			<style>
+				canvas {
+					min-width: 500px;
+					min-height: 300px;
+					overflow: scroll;
+				}
+			</style>
+		</head>
+		<body>
+			<h1>Node with MYSQL Testing: Blizzard Token Tracker</h1>
+			
+			<h2>Token US</h2>
+			<p>
+				<label id="current_US"></label>
+			</p>
+			<canvas id="tokenChart_US"></canvas>
+			
+			<h2>Token EU</h2>
+			<p>
+				<label id="current_EU"></label>
+			</p>
+			<canvas id="tokenChart_EU"></canvas>
+			
+			<h2>Token KR</h2>
+			<p>
+				<label id="current_KR"></label>
+			</p>
+			<canvas id="tokenChart_KR"></canvas>
+			
+			<h2>Token TW</h2>
+			<p>
+				<label id="current_TW"></label>
+			</p>
+			<canvas id="tokenChart_TW"></canvas>
+			
+			<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="  crossorigin="anonymous"></script>
+			<script src="/socket.io/socket.io.js"></script>
+			<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+			<script type="text/javascript">
+				var socket = io.connect('http://192.168.1.8:9292');
+
+				$(document).ready(function() {
+					//getTokenData();
+					//setInterval(getTokenData, 900000);
+					
+					const ctx_us = document.getElementById('tokenChart_US').getContext('2d');
+					const ctx_eu = document.getElementById('tokenChart_EU').getContext('2d');
+					const ctx_kr = document.getElementById('tokenChart_KR').getContext('2d');
+					const ctx_tw = document.getElementById('tokenChart_TW').getContext('2d');
+					
+					var chart_us = new Chart(ctx_us, {
+						type: 'line',
+						// The data for our dataset
+						data: {
+							labels: [],
+							datasets: [{
+								label: "Token Price US",
+								backgroundColor: 'rgba(255, 99, 132, .6)',
+								borderColor: 'rgb(6, 134, 244)',
+								data: []
+							}]
+						},
+						options: {}
+					});
+					var chart_eu = new Chart(ctx_eu, {	
+						type: 'line',
+						data: {
+							labels: [],
+							datasets: [{
+								label: "Token Price EU",
+								backgroundColor: 'rgba(200, 245, 15, .6)',
+								borderColor: 'rgb(60, 14, 204)',
+								data: []
+							}]
+						},
+						options: {}
+					});
+					var chart_kr = new Chart(ctx_kr, {
+						type: 'line',
+						data: {
+							labels: [],
+							datasets: [{
+								label: "Token Price KR",
+								backgroundColor: 'rgba(20, 99, 199, .6)',
+								borderColor: 'rgb(120, 204, 24)',
+								data: []
+							}]
+						},
+						options: {}
+					});
+					var chart_tw = new Chart(ctx_tw, {
+						type: 'line',
+						data: {
+							labels: [],
+							datasets: [{
+								label: "Token Price TW",
+								backgroundColor: 'rgba(56, 50, 130, .6)',
+								borderColor: 'rgb(75, 145, 36)',
+								data: []
+							}]
+						},
+						options: {}
+					});
+										
+					//might not need the getTokenData function anymore along with the getJSON or parseTokenData functions
+					//keeping in till I'm sure.
+					function getTokenData() {
+						//add the US access_token here
+						var url = "https://us.api.battle.net/data/wow/token/?namespace=dynamic-us&locale=en_US&access_token=";
+						getJSON(url, parseTokenData);
+					}
+					function parseTokenData(data) {
+						var last_update, price;
+						var date;
+						last_update = data.last_updated;
+						date = new Date(0);
+						date.setUTCSeconds(last_update);
+						
+						price = data.price;
+						
+						price = price / 10000;
+									
+						$('#test').text("Token Price: " + price.toLocaleString() + " Gold, @ " + date);
+						
+					}
+					function updateChart(data) {
+						for(var b = 0; b < data.length; b++) {
+							var json = JSON.parse(data[b]);
+							var lastUpdate;
+							var labels = [];
+							var dataset = [];
+							
+							if(b === 0) {
+								for(var i = 0; i < json.length; i++){
+									lastUpdate = new Date(json[i].LAST_UPDATE_US).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+									labels.push(lastUpdate);
+									dataset.push(json[i].PRICE_US);
+								}
+								console.log('labels: ' + labels);
+								chart_us.data.datasets[0].data = dataset;
+								chart_us.data.labels = labels;
+								chart_us.update();
+								document.getElementById('current_US').innerHTML = 'Current Price: ' + dataset[dataset.length-1] + '</br> On: ' + labels[labels.length-1];
+								labels = [];
+								dataset = [];
+								
+							}
+							else if(b === 1){
+								for(var j = 0; j < json.length; j++){
+									lastUpdate = new Date(json[j].LAST_UPDATE_EU).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+									labels.push(lastUpdate);
+									dataset.push(json[j].PRICE_EU);
+								}
+								chart_eu.data.datasets[0].data = dataset;
+								chart_eu.data.labels = labels;
+								chart_eu.update();
+								document.getElementById('current_EU').innerHTML = 'Current Price: ' + dataset[dataset.length-1] + '</br> On: ' + labels[labels.length-1];
+								labels = [];
+								dataset = [];
+							}
+							else if(b === 2){
+								for(var h = 0; h < json.length; h++){
+									lastUpdate = new Date(json[h].LAST_UPDATE_KR).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+									labels.push(lastUpdate);
+									dataset.push(json[h].PRICE_KR);
+								}
+								chart_kr.data.datasets[0].data = dataset;
+								chart_kr.data.labels = labels;
+								chart_kr.update();
+								document.getElementById('current_KR').innerHTML = 'Current Price: ' + dataset[dataset.length-1] + '</br> On: ' + labels[labels.length-1];
+								labels = [];
+								dataset = [];
+							}
+							else if(b === 3){
+								for(var k = 0; k < json.length; k++){
+									lastUpdate = new Date(json[k].LAST_UPDATE_TW).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+									labels.push(lastUpdate);
+									dataset.push(json[k].PRICE_TW);
+								}
+								chart_tw.data.datasets[0].data = dataset;
+								chart_tw.data.labels = labels;
+								chart_tw.update();
+								document.getElementById('current_TW').innerHTML = 'Current Price: ' + dataset[dataset.length-1] + '</br> On: ' + labels[labels.length-1];
+								labels = [];
+								dataset = [];
+							}
+							
+						}
+					}
+
+					socket.on('token_info', function(data) {
+						updateChart(data);
+					});
+					function getJSON(URL,POST_PROCESS) {
+						$.ajax({
+								async: false,
+								crossDomain: true,
+								url: URL,
+								type: 'GET',
+								dataType: 'json',
+								success: function(r){
+									POST_PROCESS(r);
+
+								}
+						});
+					}
+				});
+			</script>	
+		</body>
+	</html>
