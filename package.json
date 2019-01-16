@@ -2,12 +2,12 @@
 	"name": "token-world-app",
 	"version": "0.1.0",
 	"dependencies": {
-		"chart.js": "^2.7.1",
-		"ejs": "^2.5.7",
-		"express": "^4.16.2",
-		"mysql": "^2.15.0",
-		"request": "^2.83.0",
-		"socket.io": "^2.0.4"
+		"chart.js": "^2.7.3",
+		"ejs": "^2.6.1",
+		"express": "^4.16.4",
+		"mysql": "^2.16.0",
+		"request": "^2.88.0",
+		"socket.io": "^2.2.0"
 	},
 	"author": "Matthew <mecoldsmith@gmail.com>",
 	"description": "Blizzard Token checker for all continents"
