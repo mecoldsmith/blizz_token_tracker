@@ -1,4 +1,4 @@
-CREATE DEFINER=`mecoldsmith`@`localhost` PROCEDURE `storeToken`(IN `price` INT, IN `epoch` INT, IN `table_used` VARCHAR(25))
+CREATE DEFINER=`user`@`localhost` PROCEDURE `storeToken`(IN `price` INT, IN `epoch` BIGINT, IN `table_used` VARCHAR(25))
 BEGIN
 
 SET @using_table = CONCAT('INSERT IGNORE into ',table_used,'(PRICE, LAST_UPDATE,TIME_ENTERED, EPOCH) 
